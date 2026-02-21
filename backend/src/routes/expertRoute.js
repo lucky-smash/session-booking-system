@@ -34,11 +34,22 @@ routes.get('/', async (req, res) => {
   }
 });
 
+// GET single expert by ID
+routes.get("/:id", async (req, res) => {
+  try {
+    const expert = await Expert.findById(req.params.id);
+    if (!expert) return res.status(404).json({ message: "Expert not found" });
+    res.json(expert);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Add a new expert
 routes.post('/', async (req, res) => {
-    const { name, category, experience, rating } = req.body;
+    const { name, category, experience, rating, availability } = req.body;
     try {
-        const newExpert = new Expert({ name, category, experience, rating });
+        const newExpert = new Expert({ name, category, experience, rating , availability });
         await newExpert.save();
         res.status(201).json(newExpert);
     } catch (error) {
