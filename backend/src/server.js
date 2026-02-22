@@ -50,10 +50,6 @@ console.log("✅ booking routes mounted at /api/bookings");
 // Connect to MongoDB
 
 connectDB();
-
-// Booking.syncIndexes().then(() => {
-//   console.log("✅ Booking indexes synced");
-// });
 Booking.syncIndexes()
 
 
