@@ -5,7 +5,7 @@ import Experts from "./pages/Experts.jsx";
 import ExpertDetails from "./pages/ExpertDetails.jsx";
 import BookSlot from "./pages/BookSlot.jsx";
 import MyBookings from "./pages/MyBookings.jsx";
-import Layout from "./components/layout.jsx";
+import Layout from "./components/Layout.jsx";
 
 function App() {
   const [count, setCount] = useState(0)
