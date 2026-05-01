@@ -33,7 +33,7 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col overflow-hidden px-4 py-3">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col overflow-y-auto px-4 py-3">
         {children}
       </main>
     </div>

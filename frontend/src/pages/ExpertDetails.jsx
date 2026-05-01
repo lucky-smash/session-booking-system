@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { socket } from "../socket.js";
+import { API_BASE } from "../api.js";
 
 /* ── helper: avatar color from name ── */
 const AVATAR_COLORS = [
@@ -37,7 +38,7 @@ export default function ExpertDetails() {
     try {
       setLoading(true);
       setError("");
-      const res = await fetch(`http://localhost:5000/api/experts/${id}`);
+      const res = await fetch(`${API_BASE}/api/experts/${id}`);
       const data = await res.json();
       setExpert(data.expert || data);
     } catch (e) {
@@ -98,134 +99,95 @@ export default function ExpertDetails() {
   if (!expert)
     return (
       <div className="mx-auto max-w-3xl rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-12 text-center text-sm text-gray-500">
-        No expert found
+        Expert not found.
       </div>
     );
-
-  const availability = expert.availability || [];
-  const initials = (expert.name || "")
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  const totalSlots = availability.reduce((s, d) => s + (d.slots?.length || 0), 0);
-  const openSlots = availability.reduce(
-    (s, d) => s + (d.slots?.filter((sl) => !sl.isBooked).length || 0),
-    0
-  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       {/* ── Profile card ── */}
       <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        {/* Decorative gradient bar */}
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-purple-600 to-purple-400" />
 
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white shadow-lg ${avatarColorClass(expert.name)}`}
-            >
-              {initials}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          {/* Avatar */}
+          <div
+            className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold text-white shadow-lg ${avatarColorClass(expert.name)}`}
+          >
+            {expert.name
+              .split(" ")
+              .map((w) => w[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase()}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="truncate text-2xl font-bold text-gray-900">{expert.name}</h1>
+              <button
+                onClick={() => navigate(-1)}
+                className="hidden items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 sm:flex"
+              >
+                ← Back
+              </button>
             </div>
 
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-gray-900">
-                {expert.name || "Expert"}
-              </h1>
-              <p className="mt-0.5 text-sm font-medium text-purple-600">
-                {expert.category || "-"}
-              </p>
-              <div className="mt-1.5 flex items-center gap-3">
-                <Stars count={expert.rating} />
-                <span className="text-xs text-gray-500">
-                  {expert.experience ?? "-"} yrs exp
-                </span>
+            <p className="mt-1 text-purple-600 font-medium">{expert.category}</p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <div className="flex flex-col rounded-xl border border-gray-100 bg-gray-50 px-3 py-1.5">
+                <span className="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Experience</span>
+                <span className="text-sm font-bold text-gray-700">{expert.experience} Years</span>
+              </div>
+              <div className="flex flex-col rounded-xl border border-gray-100 bg-gray-50 px-3 py-1.5">
+                <span className="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Rating</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-gray-700">{expert.rating}</span>
+                  <Stars count={expert.rating} />
+                </div>
               </div>
             </div>
-          </div>
-
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 hover:shadow"
-          >
-            ← Back
-          </button>
-        </div>
-
-        {/* Quick stats */}
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          <div className="rounded-xl bg-purple-50 p-3 text-center">
-            <div className="text-lg font-bold text-purple-700">{expert.experience}</div>
-            <div className="text-xs text-purple-600">Years Exp</div>
-          </div>
-          <div className="rounded-xl bg-amber-50 p-3 text-center">
-            <div className="text-lg font-bold text-amber-700">{expert.rating}</div>
-            <div className="text-xs text-amber-600">Rating</div>
-          </div>
-          <div className="rounded-xl bg-emerald-50 p-3 text-center">
-            <div className="text-lg font-bold text-emerald-700">{openSlots}/{totalSlots}</div>
-            <div className="text-xs text-emerald-600">Slots Open</div>
           </div>
         </div>
       </div>
 
       {/* ── Availability ── */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-bold text-gray-900">📅 Available Slots</h2>
-
-        {availability.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-10 text-center text-sm text-gray-500">
-            No availability set
+      <div className="space-y-4">
+        <h2 className="text-lg font-bold text-gray-900">Available Slots</h2>
+        {expert.availability?.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 py-8 text-center text-sm text-gray-500">
+            No slots listed for this expert.
           </div>
         ) : (
-          <div className="space-y-4">
-            {availability.map((day) => {
-              const open = (day.slots || []).filter((s) => !s.isBooked).length;
-              return (
-                <div
-                  key={day.date}
-                  className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="text-sm font-bold text-gray-900">{day.date}</div>
-                    <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-600">
-                      {open} available
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {(day.slots || []).map((slot) => {
-                      const booked = Boolean(slot.isBooked);
-                      return (
-                        <button
-                          key={slot.time}
-                          type="button"
-                          disabled={booked}
-                          onClick={() =>
-                            navigate(
-                              `/book/${expert._id}?date=${day.date}&timeSlot=${encodeURIComponent(slot.time)}`
-                            )
-                          }
-                          className={[
-                            "rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200",
-                            booked
-                              ? "cursor-not-allowed border border-gray-200 bg-gray-100 text-gray-400 line-through"
-                              : "bg-gradient-to-br from-purple-600 to-purple-500 text-white shadow-sm shadow-purple-300/30 hover:-translate-y-0.5 hover:shadow-md hover:shadow-purple-300/40",
-                          ].join(" ")}
-                          title={booked ? "Already booked" : "Click to book"}
+          expert.availability.map((day) => (
+            <div key={day.date} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <div className="bg-gray-50/50 border-b border-gray-100 px-5 py-3">
+                <h3 className="text-sm font-bold text-gray-700">📅 {day.date}</h3>
+              </div>
+              <div className="p-5">
+                <div className="flex flex-wrap gap-2.5">
+                  {day.slots.map((slot, idx) => (
+                    <div key={idx} className="relative">
+                      {slot.isBooked ? (
+                        <div className="cursor-not-allowed rounded-xl border border-gray-100 bg-gray-50 px-4 py-2 text-xs font-bold text-gray-300">
+                          {slot.time}
+                        </div>
+                      ) : (
+                        <Link
+                          to={`/book/${expert._id}?date=${day.date}&time=${slot.time}`}
+                          className="inline-block rounded-xl border border-purple-100 bg-purple-50 px-4 py-2 text-xs font-bold text-purple-700 transition hover:bg-purple-600 hover:text-white hover:shadow-md hover:shadow-purple-200"
                         >
                           {slot.time}
-                        </button>
-                      );
-                    })}
-                  </div>
+                        </Link>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

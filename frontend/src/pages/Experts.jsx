@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE } from "../api.js";
 
 /* ── helper: pick a badge based on rating / experience ── */
 function getBadge(expert) {
@@ -69,7 +70,7 @@ export default function Experts() {
         ...(search && { search }),
         ...(category && { category }),
       });
-      const res = await fetch(`http://localhost:5000/api/experts?${params}`);
+      const res = await fetch(`${API_BASE}/api/experts?${params}`);
       const data = await res.json();
       setExperts(data.experts || data || []);
       setTotalPages(data.totalPages || 1);

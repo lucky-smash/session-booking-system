@@ -18,7 +18,8 @@ function App() {
     socket.on("disconnect", () => {
       console.log("❌ socket disconnected");
     });
-
+    // just add this line anywhere
+    console.log("force rebuild");
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -26,6 +27,7 @@ function App() {
   }, []);
   return (
     <>
+
       <Router>
         <Layout>
           <Routes>
